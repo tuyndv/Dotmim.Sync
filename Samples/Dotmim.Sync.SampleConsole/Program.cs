@@ -46,7 +46,7 @@ internal class Program
     private static async Task Main(string[] args)
     {
 
-        await SyncBlobTypeToSqliteThroughKestrellAsync();
+        await SynchronizeHeavyTableAsync();
 
     }
 
@@ -55,7 +55,7 @@ internal class Program
         // server provider
         // Create 2 Sql Sync providers
         var serverProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(serverDbName));
-        var clientProvider = new SqliteSyncProvider("testblob2.db");
+        var clientProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(clientDbName));
 
         var configureServices = new Action<IServiceCollection>(services =>
         {
@@ -144,12 +144,12 @@ internal class Program
     {
         // Create 2 Sql Sync providers
         var serverProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString("HeavyTables"));
-        var clientProvider = new SqliteSyncProvider("heavyTwo.db");
+        var clientProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString("Client"));
 
         var setup = new SyncSetup(new string[] { "Customer" });
 
         var options = new SyncOptions();
-        options.BatchSize = 4000;
+        //options.BatchSize = 4000;
 
         // Creating an agent that will handle all the process
         var agent = new SyncAgent(clientProvider, serverProvider, options, setup);
