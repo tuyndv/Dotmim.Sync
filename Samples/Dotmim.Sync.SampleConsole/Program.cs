@@ -34,7 +34,7 @@ using System.Threading;
 
 internal class Program
 {
-    public static string serverDbName = "AdventureWorks";
+    public static string serverDbName = "HeavyTables";
     public static string serverProductCategoryDbName = "AdventureWorksProductCategory";
     public static string clientDbName = "Client";
     public static string[] allTables = new string[] {"ProductDescription", "ProductCategory",
@@ -56,11 +56,11 @@ internal class Program
         var serverProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(serverDbName));
         var clientProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(clientDbName));
         //var clientProvider = new SqliteSyncProvider("dedee.db");
-        var setup = new SyncSetup(new string[] { "Address", "Customer", "CustomerAddress", "SalesOrderHeader", "SalesOrderDetail" });
+        var setup = new SyncSetup(new string[] { "Customer" });
 
         var options = new SyncOptions();
         // Creating an agent that will handle all the process
-        var agent = new SyncAgent(clientProvider, serverProvider, options, allTables);
+        var agent = new SyncAgent(clientProvider, serverProvider, options, setup);
 
         // Using the Progress pattern to handle progession during the synchronization
         var progress = new SynchronousProgress<ProgressArgs>(s =>
@@ -72,13 +72,23 @@ internal class Program
 
         do
         {
-            // Console.Clear();
+            Console.Clear();
             Console.WriteLine("Sync Start");
             try
             {
-                var r = await agent.SynchronizeAsync(progress);
-                // Write results
-                Console.WriteLine(r);
+                System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+                stopwatch.Start();
+
+                for (int i = 0; i < 5; i++)
+                {
+                    var result = await agent.SynchronizeAsync(SyncType.Reinitialize);
+                    Console.WriteLine($"Step {i}: Download {result.TotalChangesDownloaded}");
+                }
+
+                stopwatch.Stop();
+                var str = $"{stopwatch.Elapsed.Minutes}:{stopwatch.Elapsed.Seconds}.{stopwatch.Elapsed.Milliseconds}";
+                Console.WriteLine(str);
+
             }
             catch (Exception e)
             {
@@ -1008,12 +1018,12 @@ internal class Program
         // We can conserve the Address tracking table, since we just add a column, 
         // that is not a primary key used in the tracking table
         // That way, we are preserving historical data
-        await remoteOrchestrator.DeprovisionAsync(SyncProvision.StoredProcedures | SyncProvision.Triggers);
+        await remoteOrchestrator.DeprovisionAsync(SyncProvision.Triggers);
 
         // Provision the Address triggers / stored proc again, 
         // This provision method will fetch the address schema from the database, 
         // so it will contains all the columns, including the new Address column added
-        await remoteOrchestrator.ProvisionAsync(SyncProvision.StoredProcedures | SyncProvision.Triggers);
+        await remoteOrchestrator.ProvisionAsync(SyncProvision.Triggers);
 
         // Now we need the full setup to get the full schema.
         // Setup includes [Address] [Customer] and [CustomerAddress]
@@ -1040,11 +1050,11 @@ internal class Program
 
         // Unprovision the Address triggers / stored proc. We can conserve tracking table, since we just add a column, that is not a primary key used in the tracking table
         // In this case, we will 
-        await localOrchestrator.DeprovisionAsync(SyncProvision.StoredProcedures | SyncProvision.Triggers);
+        await localOrchestrator.DeprovisionAsync(SyncProvision.Triggers);
 
         // Provision the Address triggers / stored proc again, 
         // This provision method will fetch the address schema from the database, so it will contains all the columns, including the new one added
-        await localOrchestrator.ProvisionAsync(SyncProvision.StoredProcedures | SyncProvision.Triggers);
+        await localOrchestrator.ProvisionAsync( SyncProvision.Triggers);
 
         // Now we need to save this to clientscope
         // get the server scope again
@@ -1655,8 +1665,7 @@ internal class Program
                 var serverScope = await agent.RemoteOrchestrator.GetServerScopeAsync();
 
 
-                await agent.RemoteOrchestrator.DeprovisionAsync(SyncProvision.StoredProcedures
-                                                                     | SyncProvision.Triggers | SyncProvision.TrackingTable);
+                await agent.RemoteOrchestrator.DeprovisionAsync(SyncProvision.Triggers | SyncProvision.TrackingTable);
 
                 // Affect good values
                 serverScope.Setup = null;
