@@ -46,7 +46,17 @@ internal class Program
     private static async Task Main(string[] args)
     {
 
-        await SynchronizeAsync();
+        var options = new SyncOptions
+        {
+            BatchDirectory = "C:\\tmp",
+            CleanFolder = true,
+            ConflictResolutionPolicy = ConflictResolutionPolicy.ClientWins,
+        };
+        options.AddStoredProcedures(SyncOrchestrator.LocalOrchestrator, true) ;
+
+        var optionsJson = JsonConvert.SerializeObject(options);
+
+        var options2 = JsonConvert.DeserializeObject<SyncOptions>(optionsJson);
 
     }
 
@@ -58,7 +68,15 @@ internal class Program
         //var clientProvider = new SqliteSyncProvider("dedee.db");
         var setup = new SyncSetup(new string[] { "Customer" });
 
-        var options = new SyncOptions();
+
+
+        var options = new SyncOptions
+        {
+            BatchDirectory = "C:\\tmp",
+            CleanFolder = true,
+            ConflictResolutionPolicy = ConflictResolutionPolicy.ClientWins,
+        };
+
         // Creating an agent that will handle all the process
         var agent = new SyncAgent(clientProvider, serverProvider, options, setup);
 
