@@ -13,16 +13,18 @@
     <Description>Sql Server Sync Provider. Manage a sync process beetween two relational databases provider. This provider works with SQL Server and can be used as Client or Server provider .Net Standard 2.0</Description>
     <PackageTags>Data, Database, Sync, Synchronization, Framework, Sql, MySql, Sqlite, Dotmim.Sync, NetStandard, SyncFramework</PackageTags>
     <PackageProjectUrl>https://dotmimsync.readthedocs.io/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Mimetis/Dotmim.Sync</RepositoryUrl>
+    <RepositoryUrl>https://github.com/tuyndv/Dotmim.Sync</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <VersionSuffix>$(VersionSuffix)</VersionSuffix>
-    <Version>0.8.1</Version>
+    <Version>0.8.1.1</Version>
     <Version Condition=" '$(VersionSuffix)' != '' ">$(Version)-$(VersionSuffix)</Version>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
     <PackageIcon>packageIcon.png</PackageIcon>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <LangVersion>8.0</LangVersion>
+    <PackageId>Alomso.Dotmim.Sync.SqlServer</PackageId>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <!--generate NUGET package including symbols ans source on each release build -->
